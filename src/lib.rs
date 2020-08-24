@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::cmp;
 use std::convert::TryFrom;
-use std::env;
 use std::fs::{self, File};
 use std::io::{self, ErrorKind, Seek, SeekFrom, Read};
 use std::iter::Peekable;
@@ -73,7 +72,7 @@ fn traverse(write: &mut WriteIndex, path: &Path) -> Result<(), io::Error> {
 }
 
 #[derive(Debug)]
-struct Index {
+pub struct Index {
     root: PathBuf,
     segments: Vec<Segment>,
 }
@@ -262,7 +261,7 @@ impl Index {
     }
 }
 
-struct SeekReader<'a> {
+pub struct SeekReader<'a> {
     offset: u64,
     segments: Peekable<slice::Iter<'a, Segment>>,
 }
@@ -291,14 +290,4 @@ impl<'a> SeekReader<'a> {
 
         Ok(nread)
     }
-}
-
-fn main() {
-    let path = PathBuf::from(env::args_os().nth(1).expect("usage: rangetar <path>"));
-    let index = Index::scan(path).expect("Index::scan");
-
-    let mut buf = [0; 128];
-    let nread = index.seek(0).read(&mut buf).unwrap();
-
-    println!("read: {}\nbuf: {:?}", nread, &buf[0..nread]);
 }
